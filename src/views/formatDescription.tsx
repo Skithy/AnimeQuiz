@@ -34,6 +34,7 @@ export const formatDescription = (data: IMediaData, description: string): string
 		}
 	}
 
+	console.log(keyWords)
 	return description
 }
 

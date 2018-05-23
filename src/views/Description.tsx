@@ -49,21 +49,23 @@ class Description extends React.PureComponent<ChildProps<IInputProps, IResponse>
 		const newDescription = formatDescription(Media, description)
 
 		return (
-			<>
+			<div style={{ marginTop: 3.5 }}>
 				<Button onClick={this.toggleReveal}>Reveal</Button>
 				{this.state.reveal
 					? <div>
-						<h1 style={monospaceStyle}>{Media.title.romaji} - {Media.id}</h1>
+						<h1 style={monospaceStyle}>{Media.title.romaji}</h1>
 						<h2 style={monospaceStyle}>{Media.title.english}</h2>
 						<div style={monospaceStyle}>{description.split('\n').map((text, i) => <p key={i}>{text}</p>)}</div>
+						<img src={Media.coverImage.large} />
 					</div>
 					: <div>
 						<h1 style={monospaceStyle}>{Media.title.romaji ? '_'.repeat(Media.title.romaji.length) : ''}</h1>
 						<h2 style={monospaceStyle}>{Media.title.english ? '_'.repeat(Media.title.english.length) : ''}</h2>
 						<div style={monospaceStyle}>{newDescription.split('\n').map((text, i) => <p key={i}>{text}</p>)}</div>
+						<img src={Media.coverImage.large} style={{ display: 'none' }} />
 					</div>
 				}
-			</>
+			</div>
 		)
 	}
 }
@@ -73,6 +75,9 @@ const GET_ANIME = gql`
 		Media(type: ANIME, id: $id) {
 			id
 			description
+			coverImage {
+				large
+			}
 			...CharacterNames
 			...Title
 		}
@@ -95,6 +100,9 @@ interface IResponse {
 	Media: {
 		id: number
 		description: string
+		coverImage: {
+			large: string
+		}
 		characters: {
 			edges: ICharacter[]
 		}

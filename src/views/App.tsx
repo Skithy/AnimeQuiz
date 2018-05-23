@@ -2,6 +2,7 @@ import { gql } from 'apollo-boost'
 import * as React from 'react'
 import { ChildProps, graphql } from 'react-apollo'
 import { Button, Container } from 'semantic-ui-react'
+import { get, set } from '../scripts/store'
 import Description from './Description'
 
 const getRandomInt = (min: number, max: number): number => Math.floor(Math.random() * (max - min + 1)) + min
@@ -17,9 +18,9 @@ interface IState {
 class Character extends React.PureComponent<ChildProps<{}, IResponse>, IState> {
   state = {
     allIds: [],
-    correctIds: [],
-    selectedId: -1,
-    wrongIds: [],
+    correctIds: get('correctIds') || [],
+    selectedId: get('selectedId') || -1,
+    wrongIds: get('wrongIds') || [],
   }
 
   componentDidUpdate(prevProps: ChildProps<{}, IResponse>) {
@@ -49,31 +50,43 @@ class Character extends React.PureComponent<ChildProps<{}, IResponse>, IState> {
         })
       } else {
         const allIds = Page!.media.map(x => x.id)
-        this.setState({ allIds, selectedId: getRandomValue(allIds) })
+        const selectedId = this.state.selectedId === -1 ? getRandomValue(allIds) : this.state.selectedId
+        this.setState({ allIds, selectedId })
+        set('selectedId', selectedId)
       }
     }
   }
 
   handleNew = () => {
+    const selectedId = getRandomValue(this.state.allIds)
     this.setState({
       correctIds: [],
-      selectedId: getRandomValue(this.state.allIds),
+      selectedId,
       wrongIds: [],
     })
+    set('selectedId', selectedId)
+    set('correctIds', [])
+    set('wrongIds', [])
   }
 
   handleCorrect = () => {
     const { allIds, correctIds, wrongIds } = this.state
     const newCorrectIds = [...correctIds, this.state.selectedId]
     const availableIds = allIds.filter(id => !newCorrectIds.includes(id) && !wrongIds.includes(id))
-    this.setState({ correctIds: newCorrectIds, selectedId: getRandomValue(availableIds) })
+    const selectedId = getRandomValue(availableIds)
+    this.setState({ correctIds: newCorrectIds, selectedId })
+    set('selectedId', selectedId)
+    set('correctIds', newCorrectIds)
   }
 
   handleWrong = () => {
     const { allIds, correctIds, wrongIds } = this.state
     const newWrongIds = [...wrongIds, this.state.selectedId]
     const availableIds = allIds.filter(id => !correctIds.includes(id) && !newWrongIds.includes(id))
-    this.setState({ wrongIds: newWrongIds, selectedId: getRandomValue(availableIds) })
+    const selectedId = getRandomValue(availableIds)
+    this.setState({ wrongIds: newWrongIds, selectedId })
+    set('selectedId', selectedId)
+    set('wrongIds', newWrongIds)
   }
 
   render() {
