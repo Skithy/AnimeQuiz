@@ -3,7 +3,7 @@ import { IMediaData } from './query'
 
 const isUpper = (s: string): boolean => s.match(/[A-Z]/) !== null
 
-const closeEnough = (s1: string, s2: string): boolean => (get(s1, s2) / s1.length) <= 0.4
+const closeEnough = (s1: string, s2: string): boolean => (get(s1, s2) / s1.length) <= 0.3
 
 const replaceAll = (s1: string, s2: string): string => s1.replace(new RegExp(`\\b${s2}\\b`, 'g'), '_'.repeat(s2.length))
 
@@ -13,6 +13,8 @@ export const formatDescription = (data: IMediaData, description: string): string
 	const keyWords: string[] = []
 	keyWords.push(...getImportant(title.romaji))
 	keyWords.push(...getImportant(title.english))
+	description = replaceAll(description, title.romaji || '')
+	description = replaceAll(description, title.english || '')
 
 	const characters = data.characters.edges.map(x => x.node)
 	for (const character of characters) {

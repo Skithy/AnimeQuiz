@@ -2,17 +2,19 @@ import { gql } from 'apollo-boost'
 import * as React from 'react'
 import { ChildProps, graphql } from 'react-apollo'
 import { Button } from 'semantic-ui-react'
+import { MediaType } from './constants'
 import { formatDescription } from './formatDescription'
 import { MediaFragments } from './query'
 
 interface IInputProps {
 	animeId: number
+	type?: MediaType
+	handleSkip: (id: number) => void
 }
 
 interface IState {
 	reveal: boolean
 }
-
 
 const monospaceStyle = {
 	fontFamily: 'monospace'
@@ -42,9 +44,16 @@ class Description extends React.PureComponent<ChildProps<IInputProps, IResponse>
 
 		let description = txt.innerText
 		description = description.replace(/<br>/g, '\n')
-		description = description.replace(/\(Source: [^(]*\)/g, '')
+		description = description.replace(/(<i>|<\/i>)/g, '')
+		description = description.replace(/(<em>|<\/em>)/g, '')
+		description = description.replace(/\(Sources*: [^(]*\)/g, '')
 		description = description.replace(/\(Summary [^(]*\)/g, '')
 		description = description.replace(/\[Written [^[]*\]/g, '')
+
+		if (description.split(' ').length <= 25) {
+			this.props.handleSkip(Media.id)
+			return null
+		}
 
 		const newDescription = formatDescription(Media, description)
 
@@ -69,22 +78,6 @@ class Description extends React.PureComponent<ChildProps<IInputProps, IResponse>
 		)
 	}
 }
-
-const GET_ANIME = gql`
-	query GetAnime($id: Int!) {
-		Media(type: ANIME, id: $id) {
-			id
-			description
-			coverImage {
-				large
-			}
-			...CharacterNames
-			...Title
-		}
-	}
-	${MediaFragments.CharacterNames}
-	${MediaFragments.Title}
-`
 
 interface ICharacter {
 	node: {
@@ -113,9 +106,25 @@ interface IResponse {
 	}
 }
 
+const GET_ANIME = gql`
+	query GetAnime($id: Int!, $type: MediaType) {
+		Media(type: $type, id: $id) {
+			id
+			description
+			coverImage {
+				large
+			}
+			...CharacterNames
+			...Title
+		}
+	}
+	${MediaFragments.CharacterNames}
+	${MediaFragments.Title}
+`
+
 const withAnime = graphql<IInputProps, IResponse>(GET_ANIME, {
-	options: ({ animeId }) => ({
-		variables: { id: animeId }
+	options: ({ animeId, type }) => ({
+		variables: { id: animeId, type }
 	})
 })
 
