@@ -1,24 +1,18 @@
 {
-  "extends": [
-    "tslint:recommended",
-    "tslint-react",
-    "tslint-config-prettier"
-  ],
+  "extends": ["tslint:recommended", "tslint-react", "tslint-config-prettier"],
   "linterOptions": {
-    "exclude": [
-      "config/**/*.js",
-      "node_modules/**/*.ts"
-    ]
+    "exclude": ["config/**/*.js", "node_modules/**/*.ts"]
   },
   "rules": {
-    "semicolon": [
-      true,
-      "never"
-    ],
+    "semicolon": [true, "never"],
     "no-console": false,
-    "member-access": [
+    "member-access": [true, "no-public"],
+    "variable-name": [
       true,
-      "no-public"
+      "ban-keywords",
+      "check-format",
+      "allow-pascal-case",
+      "allow-leading-underscore"
     ]
   }
 }
